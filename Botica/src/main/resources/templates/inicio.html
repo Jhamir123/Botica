@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es">
+  <th:block th:replace="~{fragments/_head :: head('Inicio — Botica Online')}"></th:block>
+<body class="bg-light">
+  <th:block th:replace="~{fragments/_navbar :: navbar}"></th:block>
+
+  <section class="container py-5">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-7">
+        <h1 class="display-4 fw-bold">Bienvenido a nuestra Botica Online</h1>
+        <p class="lead text-muted">Descubre medicamentos y productos de bienestar con entrega a domicilio.</p>
+        <div class="d-flex gap-3">
+          <a class="btn btn-primary btn-lg" th:href="@{/promociones}">Ver Promociones activas</a>
+          <a class="btn btn-success btn-lg" th:href="@{/catalogo}">Ver Medicamentos</a>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <img class="img-fluid rounded-4 shadow" th:src="@{/img/hero-botica.jpeg}" alt="Botica">
+      </div>
+    </div>
+  </section>
+
+  <section class="container pb-5">
+    <h2 class="fw-bold mb-3">Conoce Botica Online</h2>
+    <div class="p-4 bg-white rounded-4 shadow-sm">
+      <p class="mb-0">Tu farmacia de confianza con productos de calidad, acceso fácil y seguro.</p>
+    </div>
+  </section>
+
+  <section class="container pb-5">
+    <h2 class="fw-bold mb-4">Nuestros Valores</h2>
+    <div class="row g-3">
+      <div class="col-md-4"><div class="p-4 bg-white rounded-4 shadow-sm h-100"><h5>Confianza</h5><p class="mb-0">Transparencia.</p></div></div>
+      <div class="col-md-4"><div class="p-4 bg-white rounded-4 shadow-sm h-100"><h5>Calidad</h5><p class="mb-0">Selección rigurosa.</p></div></div>
+      <div class="col-md-4"><div class="p-4 bg-white rounded-4 shadow-sm h-100"><h5>Cuidado</h5><p class="mb-0">Atención personalizada.</p></div></div>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

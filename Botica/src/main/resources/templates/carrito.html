@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+  <th:block th:replace="~{fragments/_head :: head('Carrito — Botica Online')}"></th:block>
+<body class="bg-light">
+  <th:block th:replace="~{fragments/_navbar :: navbar}"></th:block>
+
+  <div class="container py-4">
+    <h2 class="fw-bold mb-4">Tu Carrito</h2>
+    <div class="row g-4">
+
+      <!-- Lista de productos del carrito -->
+      <div class="col-lg-8">
+        <div class="vstack gap-3">
+          <div class="p-3 bg-white rounded-4 shadow-sm d-flex align-items-center"
+               th:each="ci : ${carrito}">
+            
+            <img class="rounded me-3"
+                 style="width:72px;height:72px;object-fit:cover"
+                 th:src="${ci.producto.imagenUrl}"
+                 th:alt="${ci.producto.nombre}">
+
+            <div class="flex-grow-1">
+              <div class="fw-semibold" th:text="${ci.producto.nombre}">Producto</div>
+              <div class="text-muted small">
+                Precio unitario: S/.
+                <span th:text="${#numbers.formatDecimal(ci.producto.precio,1,2)}"></span>
+              </div>
+            </div>
+
+            <!-- Formulario para cambiar cantidad -->
+            <form class="d-flex align-items-center"
+                  th:action="@{|/carrito/cambiar/${ci.producto.id}|}" method="post">
+              <button class="btn btn-outline-secondary js-minus" type="button" aria-label="Disminuir">−</button>
+
+              <input class="form-control text-center mx-1"
+                     style="width:70px" type="number" min="1" name="cantidad"
+                     th:value="${ci.cantidad}">
+
+              <button class="btn btn-outline-secondary js-plus" type="button" aria-label="Aumentar">+</button>
+            </form>
+
+            <div class="ms-3 fw-semibold">
+              S/. <span th:text="${#numbers.formatDecimal(ci.importe,1,2)}"></span>
+            </div>
+
+            <!-- Eliminar producto -->
+            <form class="ms-3" th:action="@{|/carrito/eliminar/${ci.producto.id}|}" method="post">
+              <button class="btn btn-link text-danger" title="Eliminar">🗑</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen del pedido -->
+      <div class="col-lg-4">
+        <div class="p-3 bg-white rounded-4 shadow-sm">
+          <h5 class="fw-bold">Resumen del Pedido</h5>
+          <ul class="list-unstyled small mb-2">
+            <li class="d-flex justify-content-between">
+              <span>Subtotal:</span>
+              <span>S/. <span th:text="${#numbers.formatDecimal(subtotal,1,2)}"></span></span>
+            </li>
+            <li class="d-flex justify-content-between">
+              <span>IGV (18%):</span>
+              <span>S/. <span th:text="${#numbers.formatDecimal(igv,1,2)}"></span></span>
+            </li>
+          </ul>
+          <div class="d-flex justify-content-between border-top pt-2 fw-bold mb-3">
+            <span>Total:</span>
+            <span>S/. <span th:text="${#numbers.formatDecimal(total,1,2)}"></span></span>
+          </div>
+          <a class="btn btn-primary w-100 mb-2" th:href="@{/pago}">Confirmar pedido</a>
+          <a class="btn btn-outline-secondary w-100" th:href="@{/catalogo}">Seguir comprando</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- JS sin variables duplicadas ni onclick -->
+  <script>
+    document.addEventListener('click', function (e) {
+      const minusBtn = e.target.closest('.js-minus');
+      const plusBtn  = e.target.closest('.js-plus');
+
+      if (!minusBtn && !plusBtn) return;
+
+      const form = (minusBtn || plusBtn).closest('form');
+      if (!form) return;
+
+      const qty = form.querySelector('input[name="cantidad"]');
+      if (!qty) return;
+
+      if (minusBtn) qty.stepDown();
+      if (plusBtn)  qty.stepUp();
+
+      form.submit();
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
