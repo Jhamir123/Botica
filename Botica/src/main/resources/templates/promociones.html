@@ -1,38 +1,191 @@
 <!doctype html>
-<html lang="es">
-  <th:block th:replace="~{fragments/_head :: head('Promociones — Botica Online')}"></th:block>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/_head :: head('Promociones — Botica Online')}"></th:block>
+
 <body class="bg-light">
   <th:block th:replace="~{fragments/_navbar :: navbar}"></th:block>
 
+  <!-- ===== Estilos específicos de Promociones ===== -->
+  <style>
+    :root {
+      --prim: var(--autumn-pine-green, #1C3D3A);
+      --sec: var(--dark-green, #2C4F47);
+      --mint: var(--pristine-oceanic, #4FB0A6);
+      --paper: var(--white-doctor, #F1F9F9);
+    }
+
+    .promo-hero {
+      background: linear-gradient(135deg, var(--mint) 0%, var(--paper) 60%);
+      border-radius: 16px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      padding: .35rem .7rem;
+      border-radius: 999px;
+      border: 1px solid #e6efed;
+      background: #fff;
+      font-size: .9rem;
+      color: var(--sec);
+    }
+
+    .chip i {
+      color: var(--prim)
+    }
+
+    .chip.active {
+      background: var(--prim);
+      color: #fff;
+      border-color: var(--prim)
+    }
+
+    .promo-card {
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative
+    }
+
+    .promo-card .ratio {
+      background: #f7fbfa
+    }
+
+    .ribbon {
+      position: absolute;
+      top: .65rem;
+      left: .65rem;
+      z-index: 2;
+      background: #d63384;
+      color: #fff;
+      font-weight: 700;
+      font-size: .8rem;
+      padding: .25rem .5rem;
+      border-radius: 999px;
+    }
+
+    .save-box {
+      display: inline-block;
+      background: rgba(79, 176, 166, .12);
+      color: var(--sec);
+      border: 1px solid rgba(79, 176, 166, .25);
+      padding: .15rem .45rem;
+      border-radius: 8px;
+      font-size: .8rem;
+      font-weight: 600;
+    }
+
+    .price {
+      font-weight: 800;
+      color: var(--prim)
+    }
+
+    .old {
+      text-decoration: line-through;
+      color: #92a3a0
+    }
+
+    .add-btn {
+      transition: transform .15s ease, box-shadow .15s ease
+    }
+
+    .add-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, .08)
+    }
+  </style>
+
   <main class="container py-4">
-    <h2 class="fw-bold mb-4">Promociones disponibles</h2>
-    <div class="row g-4">
-      <div class="col-md-6 col-lg-4" th:each="p : ${items}">
-        <div class="card h-100 shadow-sm">
-          <img th:src="${p.imagenUrl}" class="card-img-top" th:alt="${p.nombre}">
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title" th:text="${p.nombre}">Nombre</h5>
-            <p class="text-muted small" th:text="${p.descripcion}">Desc</p>
-            <div class="mt-auto">
-              <div class="mb-2">
-                <span class="text-decoration-line-through text-muted">
-                  S/ <span th:text="${#numbers.formatDecimal(p.precioRegular,1,2)}"></span>
-                </span>
-                <span class="fw-bold text-success ms-2">
-                  S/ <span th:text="${#numbers.formatDecimal(p.precio,1,2)}"></span>
-                </span>
-              </div>
-              <form th:action="@{|/carrito/agregar/${p.id}|}" method="post" class="d-flex gap-2">
-                <input type="hidden" name="cantidad" value="1">
-                <button class="btn btn-primary w-100" type="submit">Agregar al carrito</button>
-              </form>
-            </div>
+
+    <!-- HERO -->
+    <section class="promo-hero p-3 p-md-4 small-shadow mb-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <h2 class="fw-bold m-0">Promociones disponibles</h2>
+        <div class="small text-muted">Aprovecha stock limitado y envíos rápidos</div>
+      </div>
+
+      <!-- Búsqueda / Orden -->
+      <form class="row g-2 mt-2" th:action="@{/promociones}">
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+            <input class="form-control" name="q" th:value="${q}" placeholder="Busca por nombre, marca o categoría">
           </div>
         </div>
+        <div class="col-md-3">
+          <select class="form-select" name="orden">
+            <option th:value="'mejor_descuento'" th:selected="${orden=='mejor_descuento'}">Mejor descuento</option>
+            <option th:value="'precio_asc'" th:selected="${orden=='precio_asc'}">Precio: menor a mayor</option>
+            <option th:value="'precio_desc'" th:selected="${orden=='precio_desc'}">Precio: mayor a menor</option>
+            <option th:value="'recientes'" th:selected="${orden=='recientes'}">Más recientes</option>
+          </select>
+        </div>
+        <div class="col-md-3 d-grid">
+          <button class="btn btn-primary"><i class="bi bi-funnel"></i> Aplicar</button>
+        </div>
+      </form>
+
+      <!-- Chips de filtros rápidos (opcionales) -->
+      <div class="d-flex flex-wrap gap-2 mt-2">
+        <a class="chip" th:href="@{/promociones}"><i class="bi bi-stars"></i> Todo</a>
+        <a class="chip" th:classappend="${categoria=='Vitaminas'?' active'}"
+          th:href="@{|/promociones?categoria=Vitaminas|}"><i class="bi bi-capsule"></i> Vitaminas</a>
+        <a class="chip" th:classappend="${categoria=='Antigripales'?' active'}"
+          th:href="@{|/promociones?categoria=Antigripales|}"><i class="bi bi-thermometer-half"></i> Antigripales</a>
+        <a class="chip" th:classappend="${categoria=='Cuidado personal'?' active'}"
+          th:href="@{|/promociones?categoria=Cuidado personal|}"><i class="bi bi-heart"></i> Cuidado personal</a>
       </div>
+    </section>
+
+    <!-- GRID -->
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4" th:each="p : ${items}">
+        <article class="card promo-card h-100 small-shadow">
+          <!-- Ribbon con % -->
+          <span class="ribbon" th:if="${p.precioRegular!=null and p.precioRegular>0}"
+            th:text="${T(java.lang.Math).round((1 - (p.precio / p.precioRegular)) * 100)} + '%'">-20%</span>
+
+          <div class="ratio ratio-4x3">
+            <img class="card-img-top object-fit-cover" th:src="${p.imagenUrl}" th:alt="${p.nombre}">
+          </div>
+
+          <div class="card-body d-flex flex-column">
+            <div class="small text-muted" th:text="${p.categoria}">Categoría</div>
+            <h5 class="card-title mb-1" th:text="${p.nombre}">Nombre del producto</h5>
+            <p class="text-muted small mb-3" th:text="${p.descripcion}">Descripción de la promo</p>
+
+            <div class="mb-2">
+              <span class="old">S/ <span th:text="${#numbers.formatDecimal(p.precioRegular,1,2)}">0.00</span></span>
+              <span class="price ms-2">S/ <span th:text="${#numbers.formatDecimal(p.precio,1,2)}">0.00</span></span>
+              <span class="save-box ms-2" th:if="${p.precioRegular!=null and p.precioRegular>p.precio}"
+                th:text="'Ahorras S/ ' + #numbers.formatDecimal(p.precioRegular-p.precio,1,2)">Ahorras S/ 0.00</span>
+            </div>
+
+            <div class="mt-auto d-grid">
+              <form th:action="@{|/carrito/agregar/${p.id}|}" method="post" class="d-grid">
+                <input type="hidden" name="cantidad" value="1">
+                <button class="btn btn-primary add-btn" type="submit">
+                  <i class="bi bi-bag-plus"></i> Agregar al carrito
+                </button>
+              </form>
+              <a class="btn btn-outline-secondary mt-2" th:href="@{|/catalogo?id=${p.id}|}">
+                Ver detalles
+              </a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="text-center p-5 bg-white rounded-4 small-shadow mt-4" th:if="${items==null or items.isEmpty()}">
+      <i class="bi bi-emoji-frown display-6 d-block mb-2" style="color:var(--prim)"></i>
+      <p class="mb-3">No encontramos promociones con esos filtros.</p>
+      <a class="btn btn-outline-secondary" th:href="@{/promociones}">Limpiar filtros</a>
     </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
