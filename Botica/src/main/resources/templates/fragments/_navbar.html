@@ -1,50 +1,68 @@
-<!doctype html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
-<body th:fragment="navbar">
-<nav class="navbar navbar-expand-lg sticky-top bg-white border-bottom small-shadow">
-<div class="container">
-<a class="navbar-brand fw-bold d-flex align-items-center gap-2" th:href="@{/}">
-<i class="bi bi-capsule-pill text-primary"></i>
-<span>Botica Online</span>
-</a>
+<!-- templates/fragments/_navbar.html -->
+<nav class="navbar navbar-expand-lg sticky-top bg-white border-bottom small-shadow"
+     th:fragment="navbar(active)"
+     th:with="path=${#request != null ? #request.requestURI : ''}">
 
+  <div class="container">
+    <a class="navbar-brand fw-bold d-flex align-items-center gap-2" th:href="@{/}">
+      <i class="bi bi-capsule-pill text-primary"></i>
+      <span>Botica Online</span>
+    </a>
 
-<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Menú">
-<span class="navbar-toggler-icon"></span>
-</button>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"
+            aria-controls="nav" aria-expanded="false" aria-label="Menú">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
+    <div id="nav" class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <!-- INICIO -->
+        <li class="nav-item">
+          <a class="nav-link nav-underline"
+             th:classappend="${active}=='inicio' or #strings.startsWith(path,'/inicio') ? ' active' : ''"
+             th:href="@{/inicio}">Inicio</a>
+        </li>
 
-<div id="nav" class="collapse navbar-collapse">
-<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-<li class="nav-item">
-<a class="nav-link nav-underline" th:classappend="${#httpServletRequest.requestURI=='/inicio'} ? 'active'" th:href="@{/inicio}">Inicio</a>
-</li>
-<li class="nav-item">
-<a class="nav-link nav-underline" th:classappend="${#httpServletRequest.requestURI.startsWith('/promociones')} ? 'active'" th:href="@{/promociones}">Promociones</a>
-</li>
-<li class="nav-item">
-<a class="nav-link nav-underline" th:classappend="${#httpServletRequest.requestURI.startsWith('/catalogo')} ? 'active'" th:href="@{/catalogo}">Catálogo</a>
-</li>
-</ul>
+        <!-- PROMOCIONES -->
+        <li class="nav-item">
+          <a class="nav-link nav-underline"
+             th:classappend="${active}=='promociones' or #strings.startsWith(path,'/promociones') ? ' active' : ''"
+             th:href="@{/promociones}">Promociones</a>
+        </li>
 
+        <!-- CATÁLOGO -->
+        <li class="nav-item">
+          <a class="nav-link nav-underline"
+             th:classappend="${active}=='catalogo' or #strings.startsWith(path,'/catalogo') ? ' active' : ''"
+             th:href="@{/catalogo}">Catálogo</a>
+        </li>
+      </ul>
 
-<form class="d-none d-lg-flex me-3" role="search" th:action="@{/catalogo}">
-<div class="input-group input-group-sm">
-<span class="input-group-text bg-transparent"><i class="bi bi-search"></i></span>
-<input class="form-control border-start-0" name="q" placeholder="Buscar medicamentos…" />
-</div>
-</form>
+      <!-- Buscador -->
+      <form class="d-none d-lg-flex me-3" role="search" th:action="@{/catalogo}">
+        <div class="input-group input-group-sm">
+          <span class="input-group-text bg-transparent"><i class="bi bi-search"></i></span>
+          <input class="form-control border-start-0" name="q" placeholder="Buscar medicamentos…">
+        </div>
+      </form>
 
+      <!-- Acciones -->
+      <div class="d-flex align-items-center gap-2">
+        <a class="btn btn-outline-secondary btn-sm"
+           th:classappend="${active}=='login' or #strings.startsWith(path,'/login') ? ' active' : ''"
+           th:href="@{/login}">
+          <i class="bi bi-person"></i> Iniciar
+        </a>
 
-<div class="d-flex align-items-center gap-2">
-<a class="btn btn-outline-secondary btn-sm" th:href="@{/login}"><i class="bi bi-person"></i> Iniciar</a>
-<a class="btn btn-primary btn-sm position-relative" th:href="@{/carrito}">
-<i class="bi bi-bag"></i> Carrito
-<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" th:if="${carritoCount>0}" th:text="${carritoCount}">0</span>
-</a>
-</div>
-</div>
-</div>
+        <a class="btn btn-primary btn-sm position-relative"
+           th:classappend="${active}=='carrito' or #strings.startsWith(path,'/carrito') ? ' active' : ''"
+           th:href="@{/carrito}">
+          <i class="bi bi-bag"></i> Carrito
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                th:if="${carritoCount != null and carritoCount > 0}"
+                th:text="${carritoCount}">0</span>
+        </a>
+      </div>
+    </div>
+  </div>
 </nav>
-</body>
-</html>
