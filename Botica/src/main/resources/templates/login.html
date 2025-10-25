@@ -1,48 +1,162 @@
 <!doctype html>
-<html lang="es">
-  <th:block th:replace="~{fragments/_head :: head('Iniciar Sesión / Registrarse')}"></th:block>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <th:block th:replace="~{fragments/_head :: head('Iniciar Sesión / Registrarse — Botica Online')}"></th:block>
 <body class="bg-light">
   <th:block th:replace="~{fragments/_navbar :: navbar}"></th:block>
 
-  <div class="container py-5">
-    <div class="row g-4 align-items-center">
-      <div class="col-lg-6">
-        <img class="img-fluid rounded-4" th:src="@{/img/login-hero.jpg}" alt="Login">
-      </div>
-      <div class="col-lg-6">
-        <div class="bg-white rounded-4 p-4 shadow-sm">
-          <h4 class="fw-bold mb-3">Botica Online</h4>
+  <!-- ===== Estilos específicos de login ===== -->
+  <style>
+    :root{
+      --prim: var(--autumn-pine-green, #1C3D3A);
+      --sec:  var(--dark-green, #2C4F47);
+      --mint: var(--pristine-oceanic, #4FB0A6);
+      --paper:var(--white-doctor, #F1F9F9);
+    }
+    .login-hero{
+      background: radial-gradient(1400px 500px at 10% -10%, var(--mint) 0%, rgba(79,176,166,.25) 20%, transparent 60%),
+                  linear-gradient(180deg, var(--paper) 0%, #ffffff 80%);
+      border-radius: 18px;
+    }
+    .brand-mark{
+      width:48px; height:48px; border-radius:12px; background:var(--paper);
+      border:1px solid #e6efed; display:inline-flex; align-items:center; justify-content:center;
+    }
+    .auth-card{ border-radius:18px }
+    .nav-pills .nav-link{ color:var(--sec) }
+    .nav-pills .nav-link.active{ background:var(--prim) }
+    .input-icon .input-group-text{ background:transparent }
+    .help-hint{ font-size:.85rem; color:#6c757d }
+    .trust-badge{ border:1px solid #e6efed; border-radius:14px }
+  </style>
 
+  <main class="container py-5">
+    <div class="row g-4 align-items-center">
+
+      <!-- Columna visual -->
+      <div class="col-lg-6">
+        <div class="login-hero p-4 p-md-5 small-shadow h-100">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <span class="brand-mark">
+              <i class="bi bi-capsule-pill fs-4" style="color:var(--prim)"></i>
+            </span>
+            <div>
+              <h4 class="fw-bold mb-0">Botica Online</h4>
+              <small class="text-muted">Tu salud, a un clic</small>
+            </div>
+          </div>
+
+          <img class="w-100 rounded-4 object-fit-cover small-shadow"
+               th:src="@{/img/login-hero.jpg}" alt="Login"
+               style="max-height:320px">
+
+          <ul class="mt-4 list-unstyled vstack gap-2">
+            <li class="d-flex gap-2"><i class="bi bi-shield-check" style="color:var(--prim)"></i><span>Pagos seguros y rápidos</span></li>
+            <li class="d-flex gap-2"><i class="bi bi-bicycle" style="color:var(--prim)"></i><span>Entrega el mismo día</span></li>
+            <li class="d-flex gap-2"><i class="bi bi-patch-check" style="color:var(--prim)"></i><span>Productos verificados</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Columna formulario -->
+      <div class="col-lg-6">
+        <div class="bg-white auth-card p-4 p-md-5 small-shadow">
+          <h4 class="fw-bold mb-3">Bienvenido</h4>
+
+          <!-- Mensajes -->
           <div th:if="${ok}" class="alert alert-success" th:text="${ok}"></div>
           <div th:if="${param.error}" class="alert alert-danger">Credenciales inválidas</div>
           <div th:if="${param.logout}" class="alert alert-info">Sesión cerrada</div>
 
-          <ul class="nav nav-pills mb-3">
-            <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#pills-login">Iniciar sesión</button></li>
-            <li class="nav-item"><a class="nav-link" th:href="@{/registro}">Registrarse</a></li>
+          <!-- Tabs -->
+          <ul class="nav nav-pills mb-3" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#pills-login" type="button" role="tab">Iniciar sesión</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a class="nav-link" th:href="@{/registro}" role="tab">Registrarse</a>
+            </li>
           </ul>
 
           <div class="tab-content">
-            <div class="tab-pane fade show active" id="pills-login">
-              <form method="post" th:action="@{/login}">
-                <div class="mb-3">
+            <div class="tab-pane fade show active" id="pills-login" role="tabpanel">
+
+              <!-- Form login -->
+              <form method="post" th:action="@{/login}" class="vstack gap-3">
+                <div class="input-icon">
                   <label class="form-label">Correo</label>
-                  <input class="form-control" name="email" type="email" required>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-at"></i></span>
+                    <input class="form-control" name="email" type="email" placeholder="tu@correo.com" required>
+                  </div>
                 </div>
-                <div class="mb-3">
+
+                <div class="input-icon">
                   <label class="form-label">Contraseña</label>
-                  <input type="password" class="form-control" name="password" required>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                    <input id="password" type="password" class="form-control" name="password" placeholder="••••••••" required>
+                    <button class="btn btn-outline-secondary" type="button" id="togglePwd" title="Ver/Ocultar">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mt-1">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" id="remember">
+                      <label class="form-check-label" for="remember">Recuérdame</label>
+                    </div>
+                    <a class="small text-decoration-none" th:href="@{/recuperar}">¿Olvidaste tu contraseña?</a>
+                  </div>
                 </div>
+
                 <button class="btn btn-primary w-100">Entrar</button>
               </form>
-              <a class="btn btn-outline-secondary w-100 mt-2" th:href="@{/catalogo}">Continuar como invitado</a>
+
+              <a class="btn btn-outline-secondary w-100 mt-2" th:href="@{/catalogo}">
+                Continuar como invitado
+              </a>
+
+              <!-- Notas -->
+              <p class="help-hint mt-3">
+                Al continuar aceptas nuestros
+                <a href="#" class="text-decoration-none">Términos y Condiciones</a>
+                y la <a href="#" class="text-decoration-none">Política de Privacidad</a>.
+              </p>
+
+              <!-- Badges confianza -->
+              <div class="row row-cols-2 g-2 mt-2">
+                <div class="col">
+                  <div class="trust-badge p-2 d-flex align-items-center gap-2">
+                    <i class="bi bi-shield-lock" style="color:var(--prim)"></i>
+                    <small>Datos protegidos</small>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="trust-badge p-2 d-flex align-items-center gap-2">
+                    <i class="bi bi-headset" style="color:var(--prim)"></i>
+                    <small>Soporte 24/7</small>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
 
         </div>
       </div>
     </div>
-  </div>
+  </main>
+
+  <!-- Mostrar/Ocultar contraseña -->
+  <script>
+    document.getElementById('togglePwd')?.addEventListener('click', function(){
+      const i = document.getElementById('password');
+      const eye = this.querySelector('i');
+      if(!i) return;
+      i.type = i.type === 'password' ? 'text' : 'password';
+      eye.classList.toggle('bi-eye');
+      eye.classList.toggle('bi-eye-slash');
+    });
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
