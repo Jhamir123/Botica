@@ -1,94 +1,272 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
   <th:block th:replace="~{fragments/_head :: head('Carrito — Botica Online')}"></th:block>
 <body class="bg-light">
   <th:block th:replace="~{fragments/_navbar :: navbar}"></th:block>
 
-  <div class="container py-4">
-    <h2 class="fw-bold mb-4">Tu Carrito</h2>
-    <div class="row g-4">
+  <style>
+    /* ===== Estilos específicos del carrito ===== */
+    :root{
+      --prim: var(--autumn-pine-green, #1C3D3A);
+      --sec:  var(--dark-green, #2C4F47);
+      --mint: var(--pristine-oceanic, #4FB0A6);
+      --paper:var(--white-doctor, #F1F9F9);
+    }
+    .cart-hero{
+      background: linear-gradient(135deg, var(--mint) 0%, var(--paper) 55%);
+      border-radius: 16px;
+    }
+    .checkout-steps{ list-style:none; display:flex; gap:.5rem; padding:0; margin:0 }
+    .checkout-steps li{
+      display:flex; align-items:center; gap:.5rem; padding:.5rem .75rem;
+      border-radius:999px; background:#e7f5f2; color:var(--sec); font-weight:600;
+    }
+    .checkout-steps li.active{ background:var(--prim); color:#fff }
+    .checkout-steps li.done{ background:#cfe8e3 }
+    .free-ship{
+      background:#fff; border-radius:14px; padding:.75rem 1rem; border:1px dashed var(--mint);
+    }
+    .progress-slim{ height:8px; background:#e9ecef; border-radius:999px; overflow:hidden }
+    .progress-slim > span{ display:block; height:100%; background:var(--mint) }
+    .cart-item{ border:1px solid #eef2f2; border-radius:16px }
+    .qty-btn{ width:38px }
+    .summary-card{ position:sticky; top:1.25rem; border-radius:16px }
+    .summary-total{ background:var(--prim); color:#fff; border-radius:12px; }
+    .trust-badges i{ color:var(--prim) }
+    .reco-card{ border-radius:14px; transition:transform .15s ease, box-shadow .15s ease }
+    .reco-card:hover{ transform: translateY(-2px); box-shadow:0 12px 28px rgba(0,0,0,.08) }
+    .tag-pill{ position:absolute; top:.6rem; left:.6rem; background:#d63384; color:#fff; font-size:.7rem; padding:.2rem .5rem; border-radius:999px }
+    @media (max-width: 991.98px){
+      .summary-card{ position:static }
+    }
+  </style>
 
-      <!-- Lista de productos del carrito -->
-      <div class="col-lg-8">
-        <div class="vstack gap-3">
-          <div class="p-3 bg-white rounded-4 shadow-sm d-flex align-items-center"
-               th:each="ci : ${carrito}">
-            
-            <img class="rounded me-3"
-                 style="width:72px;height:72px;object-fit:cover"
-                 th:src="${ci.producto.imagenUrl}"
-                 th:alt="${ci.producto.nombre}">
+  <main class="container py-4">
 
-            <div class="flex-grow-1">
-              <div class="fw-semibold" th:text="${ci.producto.nombre}">Producto</div>
-              <div class="text-muted small">
-                Precio unitario: S/.
-                <span th:text="${#numbers.formatDecimal(ci.producto.precio,1,2)}"></span>
-              </div>
-            </div>
-
-            <!-- Formulario para cambiar cantidad -->
-            <form class="d-flex align-items-center"
-                  th:action="@{|/carrito/cambiar/${ci.producto.id}|}" method="post">
-              <button class="btn btn-outline-secondary js-minus" type="button" aria-label="Disminuir">−</button>
-
-              <input class="form-control text-center mx-1"
-                     style="width:70px" type="number" min="1" name="cantidad"
-                     th:value="${ci.cantidad}">
-
-              <button class="btn btn-outline-secondary js-plus" type="button" aria-label="Aumentar">+</button>
-            </form>
-
-            <div class="ms-3 fw-semibold">
-              S/. <span th:text="${#numbers.formatDecimal(ci.importe,1,2)}"></span>
-            </div>
-
-            <!-- Eliminar producto -->
-            <form class="ms-3" th:action="@{|/carrito/eliminar/${ci.producto.id}|}" method="post">
-              <button class="btn btn-link text-danger" title="Eliminar">🗑</button>
-            </form>
-          </div>
-        </div>
+    <!-- Encabezado + pasos -->
+    <div class="cart-hero p-3 p-md-4 mb-4 small-shadow">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h2 class="fw-bold m-0 text-dark">Tu Carrito</h2>
+        <ol class="checkout-steps">
+          <li class="active"><i class="bi bi-bag"></i> Carrito</li>
+          <li><i class="bi bi-credit-card"></i> Pago</li>
+          <li><i class="bi bi-receipt"></i> Comprobante</li>
+        </ol>
       </div>
 
-      <!-- Resumen del pedido -->
-      <div class="col-lg-4">
-        <div class="p-3 bg-white rounded-4 shadow-sm">
-          <h5 class="fw-bold">Resumen del Pedido</h5>
-          <ul class="list-unstyled small mb-2">
-            <li class="d-flex justify-content-between">
-              <span>Subtotal:</span>
-              <span>S/. <span th:text="${#numbers.formatDecimal(subtotal,1,2)}"></span></span>
-            </li>
-            <li class="d-flex justify-content-between">
-              <span>IGV (18%):</span>
-              <span>S/. <span th:text="${#numbers.formatDecimal(igv,1,2)}"></span></span>
-            </li>
-          </ul>
-          <div class="d-flex justify-content-between border-top pt-2 fw-bold mb-3">
-            <span>Total:</span>
-            <span>S/. <span th:text="${#numbers.formatDecimal(total,1,2)}"></span></span>
+      <!-- Banner Envío gratis -->
+      <div class="free-ship mt-3">
+        <div class="d-flex justify-content-between small fw-semibold mb-1">
+          <span class="text-dark">Progreso para envío gratis</span>
+          <span class="text-muted">
+            <span th:with="falta=${150 - subtotal}"
+                  th:text="${falta>0 ? 'Te faltan S/. ' + #numbers.formatDecimal(falta,1,2) : '¡Lo lograste!'}">Te faltan S/. 00.00</span>
+          </span>
+        </div>
+        <div class="progress-slim">
+          <span style="width: 0%"
+                th:style="'width:' + ${T(java.lang.Math).min(100, (subtotal/150.0)*100)} + '%'"></span>
+        </div>
+        <div class="text-muted small mt-1">Meta: S/. 150.00 • *Solo Lima Metropolitana*</div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- Columna izquierda: Lista + extras -->
+      <div class="col-lg-8">
+
+        <!-- Lista de items -->
+        <div class="vstack gap-3">
+          <div class="p-3 bg-white cart-item small-shadow d-flex align-items-center"
+               th:each="ci : ${carrito}">
+            <div class="ratio ratio-1x1 rounded overflow-hidden me-3" style="width:80px">
+              <img class="w-100 h-100 object-fit-cover"
+                   th:src="${ci.producto.imagenUrl}"
+                   th:alt="${ci.producto.nombre}">
+            </div>
+
+            <div class="flex-grow-1">
+              <div class="d-flex justify-content-between align-items-start flex-wrap">
+                <div>
+                  <div class="fw-semibold" th:text="${ci.producto.nombre}">Producto</div>
+                  <div class="text-muted small" th:text="${ci.producto.categoria}">Categoría</div>
+                </div>
+                <div class="text-end small text-muted">
+                  P. Unit.: S/. <span th:text="${#numbers.formatDecimal(ci.producto.precio,1,2)}">0.00</span>
+                </div>
+              </div>
+
+              <div class="d-flex align-items-center mt-2 gap-2">
+                <form class="d-flex align-items-center" th:action="@{|/carrito/cambiar/${ci.producto.id}|}" method="post">
+                  <button class="btn btn-outline-secondary qty-btn js-minus" type="button" aria-label="Disminuir">−</button>
+                  <input class="form-control text-center" style="width:80px" type="number" min="1" name="cantidad"
+                         th:value="${ci.cantidad}">
+                  <button class="btn btn-outline-secondary qty-btn js-plus" type="button" aria-label="Aumentar">+</button>
+                </form>
+
+                <div class="ms-auto fw-semibold">
+                  S/. <span th:text="${#numbers.formatDecimal(ci.importe,1,2)}">0.00</span>
+                </div>
+
+                <form th:action="@{|/carrito/eliminar/${ci.producto.id}|}" method="post">
+                  <button class="btn btn-link text-danger" title="Eliminar">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
           </div>
-          <a class="btn btn-primary w-100 mb-2" th:href="@{/pago}">Confirmar pedido</a>
-          <a class="btn btn-outline-secondary w-100" th:href="@{/catalogo}">Seguir comprando</a>
+        </div>
+
+        <!-- Cupones + Método de entrega + Notas -->
+        <div class="row g-3 mt-3">
+          <div class="col-md-6">
+            <div class="p-3 bg-white rounded-4 small-shadow h-100">
+              <h6 class="fw-bold mb-2"><i class="bi bi-ticket-perforated"></i> Cupón de descuento</h6>
+              <form th:action="@{/carrito/cupon}" method="post" class="d-flex gap-2">
+                <input class="form-control" name="codigo" placeholder="EJ: SALUD10" />
+                <button class="btn btn-primary">Aplicar</button>
+              </form>
+              <div class="small text-muted mt-2">Un cupón válido se aplica al total antes del envío.</div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="p-3 bg-white rounded-4 small-shadow h-100">
+              <h6 class="fw-bold mb-2"><i class="bi bi-truck"></i> Método de entrega</h6>
+              <form th:action="@{/carrito/envio}" method="post" class="vstack gap-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="metodo" id="entrega" value="ENTREGA" checked>
+                  <label class="form-check-label" for="entrega">Entrega a domicilio</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="metodo" id="tienda" value="RECOJO">
+                  <label class="form-check-label" for="tienda">Recojo en tienda (gratis)</label>
+                </div>
+                <div class="small text-muted">Tiempo estimado: 1–3 horas en Lima.</div>
+              </form>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="p-3 bg-white rounded-4 small-shadow">
+              <h6 class="fw-bold mb-2"><i class="bi bi-chat-left-text"></i> Notas del pedido</h6>
+              <textarea class="form-control" rows="2" placeholder="Indicaciones para el repartidor, horario preferido, etc."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recomendaciones / Upsell -->
+        <section class="mt-4">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="fw-bold m-0">También te puede interesar</h5>
+            <a class="small text-decoration-none" th:href="@{/catalogo}">Ver todo <i class="bi bi-arrow-right"></i></a>
+          </div>
+          <div class="row g-3">
+            <div class="col-6 col-md-4 col-lg-3" th:each="p : ${recomendados}">
+              <article class="card reco-card h-100 position-relative">
+                <span class="tag-pill" th:if="${p.oferta}">-<span th:text="${p.descuento}">10</span>%</span>
+                <div class="ratio ratio-4x3">
+                  <img class="card-img-top object-fit-cover" th:src="${p.imagenUrl}" th:alt="${p.nombre}">
+                </div>
+                <div class="card-body d-flex flex-column">
+                  <div class="small text-muted" th:text="${p.categoria}">Categoría</div>
+                  <strong class="mb-1" th:text="${p.nombre}">Producto</strong>
+                  <div class="mt-auto">
+                    <span class="fw-semibold">S/. <span th:text="${#numbers.formatDecimal(p.precio,1,2)}">0.00</span></span>
+                    <form th:action="@{|/carrito/agregar/${p.id}|}" method="post" class="d-grid mt-2">
+                      <input type="hidden" name="cantidad" value="1"/>
+                      <button class="btn btn-outline-secondary btn-sm"><i class="bi bi-bag-plus"></i> Agregar</button>
+                    </form>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <!-- Badges de confianza -->
+        <div class="row row-cols-2 row-cols-md-4 g-3 trust-badges mt-1">
+          <div class="col">
+            <div class="p-3 bg-white rounded-4 small-shadow d-flex align-items-center gap-2">
+              <i class="bi bi-shield-check fs-4"></i><span class="small">Compra segura</span>
+            </div>
+          </div>
+          <div class="col">
+            <div class="p-3 bg-white rounded-4 small-shadow d-flex align-items-center gap-2">
+              <i class="bi bi-box-seam fs-4"></i><span class="small">Devolución 7 días</span>
+            </div>
+          </div>
+          <div class="col">
+            <div class="p-3 bg-white rounded-4 small-shadow d-flex align-items-center gap-2">
+              <i class="bi bi-bicycle fs-4"></i><span class="small">Entrega rápida</span>
+            </div>
+          </div>
+          <div class="col">
+            <div class="p-3 bg-white rounded-4 small-shadow d-flex align-items-center gap-2">
+              <i class="bi bi-headset fs-4"></i><span class="small">Soporte 24/7</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Columna derecha: Resumen sticky -->
+      <div class="col-lg-4">
+        <div class="p-3 bg-white small-shadow summary-card">
+          <h5 class="fw-bold mb-3">Resumen del Pedido</h5>
+
+          <div class="d-flex justify-content-between small mb-2">
+            <span>Subtotal</span>
+            <span>S/. <span th:text="${#numbers.formatDecimal(subtotal,1,2)}">0.00</span></span>
+          </div>
+
+          <div class="d-flex justify-content-between small mb-2">
+            <span>Descuento</span>
+            <span>- S/. <span th:text="${#numbers.formatDecimal(descuento,1,2)}">0.00</span></span>
+          </div>
+
+          <div class="d-flex justify-content-between small mb-2">
+            <span>Envío</span>
+            <span th:text="${envio>0 ? 'S/. ' + #numbers.formatDecimal(envio,1,2) : 'Gratis'}">Gratis</span>
+          </div>
+
+          <div class="d-flex justify-content-between small mb-3">
+            <span>IGV (18%)</span>
+            <span>S/. <span th:text="${#numbers.formatDecimal(igv,1,2)}">0.00</span></span>
+          </div>
+
+          <div class="summary-total d-flex justify-content-between align-items-center p-3 fw-bold">
+            <span>Total</span>
+            <span>S/. <span th:text="${#numbers.formatDecimal(total,1,2)}">0.00</span></span>
+          </div>
+
+          <a class="btn btn-primary w-100 mt-3" th:href="@{/pago}">
+            <i class="bi bi-credit-card"></i> Confirmar pedido
+          </a>
+          <a class="btn btn-outline-secondary w-100 mt-2" th:href="@{/catalogo}">
+            Seguir comprando
+          </a>
+
+          <div class="text-muted small mt-3">
+            <i class="bi bi-lock"></i> Pago seguro con Yape, Plin, tarjetas. Tus datos están protegidos.
+          </div>
         </div>
       </div>
 
     </div>
-  </div>
+  </main>
 
-  <!-- JS sin variables duplicadas ni onclick -->
+  <!-- JS: + / − y envío del form -->
   <script>
     document.addEventListener('click', function (e) {
       const minusBtn = e.target.closest('.js-minus');
       const plusBtn  = e.target.closest('.js-plus');
-
       if (!minusBtn && !plusBtn) return;
 
       const form = (minusBtn || plusBtn).closest('form');
-      if (!form) return;
-
-      const qty = form.querySelector('input[name="cantidad"]');
+      const qty = form?.querySelector('input[name="cantidad"]');
       if (!qty) return;
 
       if (minusBtn) qty.stepDown();
