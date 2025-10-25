@@ -1,52 +1,212 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
   <th:block th:replace="~{fragments/_head :: head('Registro — Botica Online')}"></th:block>
 <body class="bg-light">
   <th:block th:replace="~{fragments/_navbar :: navbar}"></th:block>
 
-  <div class="container py-5">
-    <div class="bg-white rounded-4 p-4 shadow-sm col-lg-6 mx-auto">
-      <h4 class="fw-bold mb-3">Crear cuenta</h4>
+  <!-- ===== Estilos específicos de registro ===== -->
+  <style>
+    :root{
+      --prim: var(--autumn-pine-green, #1C3D3A);
+      --sec:  var(--dark-green, #2C4F47);
+      --mint: var(--pristine-oceanic, #4FB0A6);
+      --paper:var(--white-doctor, #F1F9F9);
+    }
+    .reg-hero{
+      background: radial-gradient(1400px 500px at 10% -10%, var(--mint) 0%, rgba(79,176,166,.25) 20%, transparent 60%),
+                  linear-gradient(180deg, var(--paper) 0%, #ffffff 80%);
+      border-radius: 18px;
+    }
+    .brand-mark{
+      width:48px; height:48px; border-radius:12px; background:var(--paper);
+      border:1px solid #e6efed; display:inline-flex; align-items:center; justify-content:center;
+    }
+    .auth-card{ border-radius:18px }
+    .strength{ height:8px; background:#e9ecef; border-radius:999px; overflow:hidden }
+    .strength > span{ display:block; height:100%; width:0%; background:var(--mint); transition:width .2s ease }
+    .strength-label{ font-size:.85rem }
+    .trust-badge{ border:1px solid #e6efed; border-radius:14px }
+    .navy{ color:var(--sec) }
+  </style>
 
-      <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+  <main class="container py-5">
+    <div class="row g-4 align-items-center">
 
-      <form th:action="@{/registro}" th:object="${form}" method="post" novalidate>
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Nombres</label>
-            <input class="form-control" th:field="*{nombres}">
-            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('nombres')}" th:errors="*{nombres}"></div>
+      <!-- Lado visual -->
+      <div class="col-lg-6">
+        <div class="reg-hero p-4 p-md-5 small-shadow h-100">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <span class="brand-mark">
+              <i class="bi bi-capsule-pill fs-4" style="color:var(--prim)"></i>
+            </span>
+            <div>
+              <h4 class="fw-bold mb-0">Crea tu cuenta</h4>
+              <small class="text-muted">Beneficios, historial y compras más rápidas</small>
+            </div>
           </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Apellidos</label>
-            <input class="form-control" th:field="*{apellidos}">
-            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('apellidos')}" th:errors="*{apellidos}"></div>
-          </div>
-        </div>
 
-        <div class="mb-3">
-          <label class="form-label">Correo</label>
-          <input class="form-control" th:field="*{email}" type="email">
-          <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
-        </div>
+          <img class="w-100 rounded-4 object-fit-cover small-shadow"
+               th:src="@{/img/login-hero.jpg}" alt="Registro"
+               style="max-height:320px">
 
-        <div class="mb-3">
-          <label class="form-label">Contraseña</label>
-          <input type="password" class="form-control" th:field="*{password}">
-          <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+          <ul class="mt-4 list-unstyled vstack gap-2">
+            <li class="d-flex gap-2 navy"><i class="bi bi-truck"></i><span>Seguimiento de envíos en tiempo real</span></li>
+            <li class="d-flex gap-2 navy"><i class="bi bi-star"></i><span>Promociones exclusivas para miembros</span></li>
+            <li class="d-flex gap-2 navy"><i class="bi bi-heart-pulse"></i><span>Recompras rápidas de tus esenciales</span></li>
+          </ul>
         </div>
+      </div>
 
-        <div class="mb-3">
-          <label class="form-label">Confirmar contraseña</label>
-          <input type="password" class="form-control" th:field="*{confirmarPassword}">
-          <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('confirmarPassword')}" th:errors="*{confirmarPassword}"></div>
+      <!-- Formulario -->
+      <div class="col-lg-6">
+        <div class="bg-white auth-card p-4 p-md-5 small-shadow">
+          <h4 class="fw-bold mb-3">Crear cuenta</h4>
+
+          <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+          <form th:action="@{/registro}" th:object="${form}" method="post" novalidate class="vstack gap-3">
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Nombres</label>
+                <input class="form-control" th:field="*{nombres}" required>
+                <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('nombres')}" th:errors="*{nombres}"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Apellidos</label>
+                <input class="form-control" th:field="*{apellidos}" required>
+                <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('apellidos')}" th:errors="*{apellidos}"></div>
+              </div>
+            </div>
+
+            <div>
+              <label class="form-label">Correo</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-at"></i></span>
+                <input class="form-control" th:field="*{email}" type="email" placeholder="tu@correo.com" required>
+              </div>
+              <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+            </div>
+
+            <div>
+              <label class="form-label">Contraseña</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input id="pwd" type="password" class="form-control" th:field="*{password}" placeholder="••••••••" required>
+                <button class="btn btn-outline-secondary" type="button" id="togglePwd" title="Ver/Ocultar">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+              <div class="strength mt-2"><span id="bar"></span></div>
+              <div class="d-flex justify-content-between strength-label">
+                <small id="label">Fortaleza: —</small>
+                <small class="text-muted">Mín. 8 caracteres</small>
+              </div>
+              <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+            </div>
+
+            <div>
+              <label class="form-label">Confirmar contraseña</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-shield-check"></i></span>
+                <input id="pwd2" type="password" class="form-control" th:field="*{confirmarPassword}" placeholder="Repite tu contraseña" required>
+                <button class="btn btn-outline-secondary" type="button" id="togglePwd2" title="Ver/Ocultar">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+              <div class="form-text" id="matchHint"></div>
+              <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('confirmarPassword')}" th:errors="*{confirmarPassword}"></div>
+            </div>
+
+            <div class="row g-2">
+              <div class="col-md-8">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="terms" required>
+                  <label class="form-check-label" for="terms">
+                    Acepto los <a href="#" class="text-decoration-none">Términos</a> y la <a href="#" class="text-decoration-none">Privacidad</a>.
+                  </label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="news" checked>
+                  <label class="form-check-label" for="news">Recibir ofertas</label>
+                </div>
+              </div>
+            </div>
+
+            <button class="btn btn-success w-100" type="submit">Registrar</button>
+            <a class="btn btn-link w-100 mt-1" th:href="@{/login}">Ya tengo cuenta</a>
+
+            <!-- Badges -->
+            <div class="row row-cols-2 g-2 mt-2">
+              <div class="col">
+                <div class="trust-badge p-2 d-flex align-items-center gap-2">
+                  <i class="bi bi-shield-lock" style="color:var(--prim)"></i>
+                  <small>Datos protegidos</small>
+                </div>
+              </div>
+              <div class="col">
+                <div class="trust-badge p-2 d-flex align-items-center gap-2">
+                  <i class="bi bi-headset" style="color:var(--prim)"></i>
+                  <small>Soporte 24/7</small>
+                </div>
+              </div>
+            </div>
+          </form>
+
         </div>
-
-        <button class="btn btn-success w-100" type="submit">Registrar</button>
-        <a class="btn btn-link w-100 mt-2" th:href="@{/login}">Ya tengo cuenta</a>
-      </form>
+      </div>
     </div>
-  </div>
+  </main>
+
+  <!-- ===== JS: mostrar/ocultar + fortaleza + coincidencia ===== -->
+  <script>
+    // Toggle eye
+    const toggle = (btnId, inputId) => {
+      document.getElementById(btnId)?.addEventListener('click', function(){
+        const i = document.getElementById(inputId);
+        const eye = this.querySelector('i');
+        if(!i) return;
+        i.type = i.type === 'password' ? 'text' : 'password';
+        eye.classList.toggle('bi-eye'); eye.classList.toggle('bi-eye-slash');
+      });
+    };
+    toggle('togglePwd','pwd'); toggle('togglePwd2','pwd2');
+
+    // Fortaleza simple
+    const pwd = document.getElementById('pwd');
+    const bar = document.getElementById('bar');
+    const label = document.getElementById('label');
+    function score(s){
+      let n=0;
+      if(s.length>=8) n++;
+      if(/[A-Z]/.test(s)) n++;
+      if(/[0-9]/.test(s)) n++;
+      if(/[^A-Za-z0-9]/.test(s)) n++;
+      return n; // 0..4
+    }
+    pwd?.addEventListener('input', ()=>{
+      const n = score(pwd.value);
+      const pct = [0,25,50,75,100][n];
+      bar.style.width = pct+'%';
+      bar.style.background = n>=3 ? 'var(--prim)' : 'var(--mint)';
+      label.textContent = 'Fortaleza: ' + (['—','Baja','Media','Buena','Fuerte'][n]);
+      checkMatch();
+    });
+
+    // Coincidencia
+    const pwd2 = document.getElementById('pwd2');
+    const hint = document.getElementById('matchHint');
+    function checkMatch(){
+      if(!pwd || !pwd2) return;
+      if(!pwd2.value){ hint.textContent=''; return; }
+      const ok = pwd.value === pwd2.value;
+      hint.textContent = ok ? 'Las contraseñas coinciden.' : 'Las contraseñas no coinciden.';
+      hint.className = 'form-text ' + (ok ? 'text-success' : 'text-danger');
+    }
+    pwd2?.addEventListener('input', checkMatch);
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
