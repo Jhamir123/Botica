@@ -21,24 +21,33 @@ public class SecurityConfig {
   @Bean
   SecurityFilterChain filter(HttpSecurity http) throws Exception {
     http
-      .csrf(csrf -> csrf.disable())
+      // CSRF habilitado por defecto (recomendado)
+      .csrf(Customizer.withDefaults())
       .authorizeHttpRequests(reg -> reg
         .requestMatchers(
-            "/", "/inicio", "/promociones", "/catalogo", "/carrito/**",
-            "/pago", "/checkout/**", "/comprobante/**",
-            "/css/**", "/js/**", "/img/**",
-            "/login", "/registro", "/registro/**", "/error"
+          "/", "/inicio", "/promociones", "/catalogo", "/carrito/**",
+          "/pago", "/checkout/**", "/comprobante/**",
+          "/css/**", "/js/**", "/img/**", "/webjars/**",
+          "/login", "/registro", "/registro/**", "/error"
         ).permitAll()
         .anyRequest().authenticated()
       )
       .formLogin(form -> form
-        .loginPage("/login")
+        .loginPage("/login")            // GET
+        .loginProcessingUrl("/login")   // POST
         .usernameParameter("email")
         .passwordParameter("password")
         .defaultSuccessUrl("/inicio", true)
         .permitAll()
       )
-      .logout(Customizer.withDefaults());
+      .logout(logout -> logout
+        .logoutUrl("/logout")           // POST
+        .logoutSuccessUrl("/inicio")
+        .invalidateHttpSession(true)
+        .clearAuthentication(true)
+        .deleteCookies("JSESSIONID")
+        .permitAll()
+      );
 
     return http.build();
   }

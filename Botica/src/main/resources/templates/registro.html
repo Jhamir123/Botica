@@ -2,7 +2,8 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
   <th:block th:replace="~{fragments/_head :: head('Registro — Botica Online')}"></th:block>
 <body class="bg-light">
-  <th:block th:replace="~{fragments/_navbar :: navbar}"></th:block>
+  <!-- NAVBAR: ahora se pasa el parámetro 'active' -->
+  <th:block th:replace="~{fragments/_navbar :: navbar(active='registro')}"></th:block>
 
   <!-- ===== Estilos específicos de registro ===== -->
   <style>

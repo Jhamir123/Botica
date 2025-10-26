@@ -1,78 +1,244 @@
 <!doctype html>
-<html lang="es">
-  <th:block th:replace="~{fragments/_head :: head('Catálogo — Botica Online')}"></th:block>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/_head :: head('Catálogo — Botica Online')}"></th:block>
+
 <body class="bg-light">
-  <th:block th:replace="~{fragments/_navbar :: navbar}"></th:block>
+  <!-- NAVBAR -->
+  <th:block th:replace="~{fragments/_navbar :: navbar(active='catalogo')}"></th:block>
+
+  <style>
+    /* ===== Paleta de colores ===== */
+    :root {
+      --autumn: #1C3D3A;
+      /* Autumn Pine Green */
+      --dark: #2C4F47;
+      /* Dark Green */
+      --mint: #4FB0A6;
+      /* Pristine Oceanic */
+      --paper: #F1F9F9;
+      /* White Doctor */
+      --ink: #1b1f24;
+    }
+
+    /* ===== Hero y fondo del catálogo ===== */
+    .catalog-hero {
+      background:
+        radial-gradient(900px 380px at -10% 0%, rgba(79, 176, 166, .30) 0%, rgba(79, 176, 166, 0) 60%),
+        radial-gradient(700px 320px at 110% -20%, rgba(28, 61, 58, .20) 0%, rgba(28, 61, 58, 0) 65%),
+        linear-gradient(180deg, var(--paper) 0%, #ffffff 60%);
+      border-bottom: 1px solid #e7efee;
+    }
+
+    .hero-chip {
+      background: #e7f5f2;
+      color: var(--dark);
+      border-radius: 999px;
+      padding: .35rem .75rem;
+      font-weight: 600;
+      font-size: .85rem;
+    }
+
+    /* ===== Filtros / acordeón ===== */
+    .filters .accordion-button {
+      background: #fff;
+      color: var(--dark);
+      font-weight: 700;
+    }
+
+    .filters .accordion-item {
+      border-radius: 16px !important;
+      overflow: hidden;
+      border: 1px solid #e5eeec;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, .06);
+    }
+
+    .filters .btn-apply {
+      background: var(--autumn);
+      border-color: var(--autumn);
+    }
+
+    .filters .btn-apply:hover {
+      filter: brightness(1.04);
+    }
+
+    .filters .form-label {
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    /* ===== Tarjetas de producto ===== */
+    .product-card {
+      border: 1px solid #e5eeec;
+      border-radius: 16px;
+      transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+      overflow: hidden;
+    }
+
+    .product-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, .10);
+      border-color: #d9e9e6;
+    }
+
+    .product-card .card-title {
+      color: var(--ink);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .price {
+      color: var(--autumn);
+      letter-spacing: .2px;
+    }
+
+    .btn-cart {
+      background: var(--autumn);
+      border-color: var(--autumn);
+    }
+
+    .btn-cart:hover {
+      filter: brightness(1.04);
+    }
+
+    .btn-qty {
+      width: 42px;
+    }
+
+    .tag-pill {
+      position: absolute;
+      top: .6rem;
+      left: .6rem;
+      background: #d63384;
+      color: #fff;
+      font-size: .72rem;
+      padding: .25rem .55rem;
+      border-radius: 999px;
+      z-index: 2;
+      font-weight: 700;
+    }
+
+    .tag-featured {
+      position: absolute;
+      top: .6rem;
+      right: .6rem;
+      background: var(--mint);
+      color: #053a35;
+      font-size: .72rem;
+      padding: .25rem .55rem;
+      border-radius: 999px;
+      z-index: 2;
+      font-weight: 700;
+    }
+
+    /* ===== Utilitarios ===== */
+    .small-shadow {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .06);
+    }
+
+    .rounded-4 {
+      border-radius: 1rem !important;
+    }
+  </style>
+
+  <!-- ===== Hero ===== -->
+  <section class="catalog-hero py-4">
+    <div class="container py-2">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div>
+          <div class="hero-chip mb-2"><i class="bi bi-capsule-pill"></i> Catálogo</div>
+          <h2 class="fw-bold m-0" style="color:var(--autumn)">Encuentra lo que necesitas</h2>
+          <small class="text-muted" th:if="${items!=null}" th:text="${#lists.size(items)} + ' resultados'">0
+            resultados</small>
+        </div>
+
+        <!-- Buscador/orden en hero -->
+        <form class="d-flex align-items-center gap-2" th:action="@{/catalogo}">
+          <input class="form-control" name="q" placeholder="Buscar medicamentos…" th:value="${q}"
+            style="max-width: 260px;">
+          <select class="form-select" name="orden" style="max-width: 220px;">
+            <option th:value="'recientes'" th:selected="${orden=='recientes'}">Más recientes</option>
+            <option th:value="'precio_asc'" th:selected="${orden=='precio_asc'}">Precio: menor a mayor</option>
+            <option th:value="'precio_desc'" th:selected="${orden=='precio_desc'}">Precio: mayor a menor</option>
+          </select>
+          <button class="btn btn-outline-secondary"><i class="bi bi-funnel"></i></button>
+        </form>
+      </div>
+    </div>
+  </section>
 
   <div class="container py-4">
-    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
-      <div>
-        <h2 class="fw-bold mb-0">Catálogo</h2>
-        <small class="text-muted" th:if="${items!=null}" th:text="${#lists.size(items)} + ' resultados'">0 resultados</small>
-      </div>
-      <form class="d-flex align-items-center gap-2" th:action="@{/catalogo}">
-        <input class="form-control form-control-sm" name="q" placeholder="Buscar…" th:value="${q}" />
-        <select class="form-select form-select-sm" name="orden">
-          <option th:value="'recientes'" th:selected="${orden=='recientes'}">Más recientes</option>
-          <option th:value="'precio_asc'" th:selected="${orden=='precio_asc'}">Precio: menor a mayor</option>
-          <option th:value="'precio_desc'" th:selected="${orden=='precio_desc'}">Precio: mayor a menor</option>
-        </select>
-        <button class="btn btn-outline-secondary btn-sm"><i class="bi bi-funnel"></i></button>
-      </form>
-    </div>
-
     <div class="row g-4">
-      <!-- Filtros -->
+
+      <!-- ===== Filtros ===== -->
       <aside class="col-lg-3">
-        <div class="accordion" id="filters">
-          <div class="accordion-item small-shadow rounded-4 overflow-hidden">
-            <h2 class="accordion-header">
-              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#f1" aria-expanded="true">Filtros</button>
-            </h2>
-            <div id="f1" class="accordion-collapse collapse show">
-              <div class="accordion-body">
-                <form th:action="@{/catalogo}">
-                  <div class="mb-3">
-                    <label class="form-label">Categoría</label>
-                    <input class="form-control" name="categoria" th:value="${categoria}" />
-                  </div>
-                  <div class="row g-2 mb-3">
-                    <div class="col">
-                      <label class="form-label">Mín</label>
-                      <input class="form-control" name="min" th:value="${min}" />
+        <div class="filters">
+          <div class="accordion" id="filters">
+            <div class="accordion-item rounded-4 overflow-hidden">
+              <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#f1"
+                  aria-expanded="true">
+                  <i class="bi bi-sliders me-2" style="color:var(--autumn)"></i> Filtros
+                </button>
+              </h2>
+              <div id="f1" class="accordion-collapse collapse show">
+                <div class="accordion-body">
+                  <form th:action="@{/catalogo}">
+                    <div class="mb-3">
+                      <label class="form-label">Categoría</label>
+                      <input class="form-control" name="categoria" th:value="${categoria}"
+                        placeholder="EJ: Analgésicos">
                     </div>
-                    <div class="col">
-                      <label class="form-label">Máx</label>
-                      <input class="form-control" name="max" th:value="${max}" />
+                    <div class="row g-2 mb-3">
+                      <div class="col">
+                        <label class="form-label">Mín</label>
+                        <input class="form-control" name="min" th:value="${min}" placeholder="0.00">
+                      </div>
+                      <div class="col">
+                        <label class="form-label">Máx</label>
+                        <input class="form-control" name="max" th:value="${max}" placeholder="999.00">
+                      </div>
                     </div>
-                  </div>
-                  <button class="btn btn-primary w-100">Aplicar</button>
-                </form>
+                    <button class="btn btn-apply w-100 text-white">Aplicar</button>
+                    <a class="btn btn-outline-secondary w-100 mt-2" th:href="@{/catalogo}">Limpiar</a>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </aside>
 
-      <!-- Grid de productos -->
+      <!-- ===== Grid de productos ===== -->
       <section class="col-lg-9">
         <div class="row g-4" th:if="${items!=null and !items.isEmpty()}">
           <div class="col-md-6 col-lg-4" th:each="p : ${items}">
-            <article class="card h-100 product-card small-shadow">
-              <div class="ratio ratio-4x3">
-                <img class="card-img-top object-fit-cover" th:src="${p.imagenUrl}" th:alt="${p.nombre}" />
+            <article class="card h-100 product-card small-shadow position-relative">
+              <!-- Badges opcionales -->
+              <span class="tag-pill" th:if="${p.promoActiva}">OFERTA</span>
+              <span class="tag-featured" th:if="${p.destacado}">DESTACADO</span>
+
+              <div class="ratio ratio-4x3 bg-white">
+                <img class="card-img-top object-fit-cover" th:src="${p.imagenUrl}" th:alt="${p.nombre}">
               </div>
               <div class="card-body d-flex flex-column">
-                <h6 class="card-title mb-1" th:text="${p.nombre}">Nombre</h6>
+                <h6 class="card-title mb-1" th:text="${p.nombre}">Nombre del producto</h6>
                 <div class="text-muted small mb-2" th:text="${p.categoria}">Categoría</div>
-                <div class="fw-bold h5 mb-3">S/. <span th:text="${#numbers.formatDecimal(p.precio,1,2)}"></span></div>
+
+                <div class="price h5 fw-bold mb-3">
+                  S/. <span th:text="${#numbers.formatDecimal(p.precio,1,2)}">0.00</span>
+                </div>
+
                 <form th:action="@{|/carrito/agregar/${p.id}|}" method="post" class="mt-auto">
                   <div class="input-group">
-                    <button class="btn btn-outline-secondary js-minus" type="button" aria-label="Disminuir">−</button>
-                    <input type="number" class="form-control text-center" min="1" value="1" name="cantidad" />
-                    <button class="btn btn-outline-secondary js-plus" type="button" aria-label="Aumentar">+</button>
+                    <button class="btn btn-outline-secondary btn-qty js-minus" type="button"
+                      aria-label="Disminuir">−</button>
+                    <input type="number" class="form-control text-center" min="1" value="1" name="cantidad">
+                    <button class="btn btn-outline-secondary btn-qty js-plus" type="button"
+                      aria-label="Aumentar">+</button>
                   </div>
-                  <button class="btn btn-primary w-100 mt-2"><i class="bi bi-bag-plus"></i> Agregar al carrito</button>
+                  <button class="btn btn-cart w-100 mt-2 text-white">
+                    <i class="bi bi-bag-plus"></i> Agregar al carrito
+                  </button>
                 </form>
               </div>
             </article>
@@ -81,7 +247,7 @@
 
         <!-- Empty state -->
         <div class="text-center p-5 bg-white rounded-4 small-shadow" th:if="${items==null or items.isEmpty()}">
-          <i class="bi bi-emoji-frown display-6 d-block mb-2"></i>
+          <i class="bi bi-emoji-frown display-6 d-block mb-2" style="color:var(--dark)"></i>
           <p class="mb-3">No encontramos resultados. Intenta otro término o ajusta los filtros.</p>
           <a class="btn btn-outline-secondary" th:href="@{/catalogo}">Limpiar filtros</a>
         </div>
@@ -90,18 +256,21 @@
   </div>
 
   <script>
+    // Botones +/- cantidad
     document.addEventListener('click', function (e) {
       const minusBtn = e.target.closest('.js-minus');
-      const plusBtn  = e.target.closest('.js-plus');
+      const plusBtn = e.target.closest('.js-plus');
       if (!minusBtn && !plusBtn) return;
       const form = (minusBtn || plusBtn).closest('form');
       if (!form) return;
       const qty = form.querySelector('input[name="cantidad"]');
       if (!qty) return;
       if (minusBtn) qty.stepDown();
-      if (plusBtn)  qty.stepUp();
+      if (plusBtn) qty.stepUp();
     });
   </script>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
