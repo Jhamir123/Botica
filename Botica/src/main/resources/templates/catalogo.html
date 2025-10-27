@@ -210,6 +210,13 @@
 
       <!-- ===== Grid de productos ===== -->
       <section class="col-lg-9">
+        <!-- Botón de EXPORTAR EXCEL (arriba del grid, a la derecha) -->
+        <div class="d-flex justify-content-end mb-3">
+          <a class="btn btn-success" th:href="@{/admin/productos/export}">
+            <i class="bi bi-file-earmark-excel"></i> Exportar Excel
+          </a>
+        </div>
+
         <div class="row g-4" th:if="${items!=null and !items.isEmpty()}">
           <div class="col-md-6 col-lg-4" th:each="p : ${items}">
             <article class="card h-100 product-card small-shadow position-relative">

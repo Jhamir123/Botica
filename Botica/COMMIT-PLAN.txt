@@ -1,0 +1,9 @@
+Plan de commits sugeridos
+1. chore: estructura base
+2. feat(export): agrega exportación Excel con Apache POI
+3. feat(validation): agrega DTO con Bean Validation
+4. test(repo): DataJpaTest ProductoRepository
+5. test(service): CatalogoService con Mockito
+6. test(web): WebMvcTest capas web
+7. ci: GitHub Actions
+8. docs: README-20
